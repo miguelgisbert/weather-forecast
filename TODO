@@ -2,7 +2,16 @@ General:
     ☐ Change favicon
 
 Authentication: 
-    ☐ Set Next.js authentication 
+    ✘ Set Next.js authentication @cancelled(24-08-07 19:32)
+    ✔ Set firebase project @done(24-08-07 19:32)
+    ✔ Set firebase login @done(24-08-07 19:32)
+    ☐ Check firebase login
+    ☐ Create authentication to view cites forecast
 
 Open Weather API: 
-    ☐ Set connection
+    ✔ Set connection @done(24-08-07 19:31)
+    ☐ Create and style cards for cities
+
+Language check:
+    ☐ Create swith for language
+    ☐ Include translations on theme

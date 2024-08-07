@@ -1,0 +1,18 @@
+$clear-main-background-color: #f5f5db;
+$clear-text-color: #242424;
+$main-font-family: "'Roboto', sans-serif";
+$body-with: 1280px;
+
+body {
+    background-color: $clear-main-background-color;
+    font-family: $main-font-family;
+    color: $clear-text-color;
+    max-width: $body-with;
+    margin: 0 auto;
+    text-align: center;
+}
+
+// .MuiGrid-item {
+//     padding-left: 0 !important;
+//     padding-right: 0 !important;
+// }
