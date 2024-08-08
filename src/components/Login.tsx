@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useContext, useRef } from 'react'
-import { auth } from '../../firebaseConfig'
+import { auth, db } from '../../firebaseConfig'
 import { signOut, onAuthStateChanged } from 'firebase/auth'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { FirebaseError } from 'firebase/app'
@@ -12,6 +12,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import { doc, setDoc, getFirestore, DocumentReference, getDoc } from 'firebase/firestore'
 import { UserContext } from '../UserContext'
 import { usePopper } from '../PopperContext'
+import { CustomUser } from '../types'
 
 interface LoginProps {
   showPopper: boolean
@@ -23,9 +24,10 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
   const { formToShow, setFormToShow } = usePopper()
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
-  const [isWorker, setIsWorker] = useState(false)
-  const [isCompany, setIsCompany] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const [successMessage, setSuccessMessage] = useState<string>('')
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
+  const [open, setOpen] = useState(false) // For Alerts
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const loginButtonRef = useRef(null)
@@ -34,17 +36,21 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       const fetchUser = async () => {
         if (user) {
+          const customUser: CustomUser = {
+            uid: user.uid,
+            email: user.email
+          }
+          console.log("CustomUser dins UserContext:", customUser)
+          setUser(customUser)
           const docRef = doc(db, 'users', user.uid);
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             const data = docSnap.data()
-            if(data && data.isCompany) {
-              setUser({ ...user, isCompany: data.isCompany }) // Update the user object with the isCompany value
-            }
           } else {
             console.log('No user document!');
           }
@@ -74,7 +80,7 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
     setAnchorEl(null)
     try {
       await signInWithEmailAndPassword(auth, email, password)
-      console.log("User signed in successfully.")
+
     } catch (error) {
       if (error instanceof Error) {
         const firebaseError = error as FirebaseError
@@ -94,16 +100,20 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
     }
   }
 
-  const db = getFirestore()
-
   const signUp = async () => {
     setFormToShow('none')
     setAnchorEl(null)
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await setDoc(doc(db, "users", userCredential.user.uid), {
         email: email
       })
+
+      setSuccessMessage('Account created')
+      setAlertType('success')
+      setOpen(true)
+
     } catch (error) {
       if (error instanceof Error) {
         const firebaseError = error as FirebaseError
@@ -124,6 +134,7 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
           default:
             setErrorMessage('Unknown error.')
         }
+        setAlertType('error')
         setOpen(true)
         console.log(firebaseError.code)
       }
@@ -140,8 +151,6 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
     }
   }
 
-  const [open, setOpen] = useState(false);
-
   const handleClose = (_: React.SyntheticEvent | Event, reason: SnackbarCloseReason) => {
     if (reason === 'clickaway') {
       return;
@@ -153,21 +162,17 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
     handleClose(event, 'timeout');
   }
 
-  const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsWorker(event.target.checked)
-    setIsCompany(!event.target.checked)
-  }
-
   return (
     <>
     <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-      <Alert onClose={handleAlertClose} severity="error" sx={{ width: '100%' }}>
-        {errorMessage}
+      <Alert onClose={handleAlertClose} severity={alertType} sx={{ width: '100%' }}>
+        {alertType === 'success' ? successMessage : errorMessage}
       </Alert>
     </Snackbar>
       {!user ? (
         <Box sx={{ display: "flex", alignItems: "stretch" }}>
+          {user}
           <Button ref={loginButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", height: "100%" }} 
             onClick={(e) => {
               setFormToShow('login')
@@ -230,14 +235,7 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
-            {formToShow === 'signup' && (
-              <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
-                <Typography fontSize={14} fontWeight={isCompany ? 700 : 400}>Company</Typography>
-                <Switch defaultChecked={false} inputProps={{ 'aria-label': 'ant design' }} onChange={handleSwitchChange} />
-                <Typography fontSize={14} fontWeight={isWorker ? 700 : 400}>Worker</Typography>
-              </Stack>
-            )}
-            <Button type="submit" onClick={formToShow === 'login' ? signIn : signUp}>
+            <Button type="submit" onSubmit={formToShow === 'login' ? signIn : signUp}>
               {formToShow === 'login' ? 'Sign In' : 'Create Account'}
             </Button>
           </Box>

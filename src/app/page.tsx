@@ -7,7 +7,7 @@ import Header from '../components/Header'
 import { ScreenSizeContext } from '../ScreenSizeContext'
 import { PopperProvider } from '../PopperContext'
 import { Breakpoint, CustomUser } from '../types'
-import { Grid } from '@mui/material'
+import { Grid, Card, Typography } from '@mui/material'
 import { getCityCoordinates } from '../lib/getCityCoordinates'
 import Forecast from '@/pages/forecast'
 
@@ -68,12 +68,12 @@ export default function Home() {
     <PopperProvider>
       <ScreenSizeContext.Provider value={currentBreakpoint}>
         <Header showPopper={false} />
-        <Grid sx={{ marginTop: "100px" }}>
+        <Grid container direction= {"row"} justifyContent= {"center"} gap={5} sx={{ margin: "100px 0" }}>
           {cities.map((city) => (
-            <div key={city.name}>
-              <h2>{city.name}</h2>
+            <Card key={city.name} sx={{ padding: "30px 40px", borderRadius: "15px" }}>
+              <Typography variant="h4" sx={{ paddingBottom: "20px" }} >{city.name}</Typography>
               <Forecast lat={city.coordinates.lat} lon={city.coordinates.lon} />
-            </div>
+            </Card>
           ))}
         </Grid>
       </ScreenSizeContext.Provider>
