@@ -1,43 +1,47 @@
-import { createContext, useState, useEffect, Dispatch, SetStateAction, ReactNode } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
+import React, { createContext, useState, useEffect, ReactNode } from 'react'
 import { auth } from '../firebaseConfig'
-import { CustomUser } from './types'
+import { onAuthStateChanged } from 'firebase/auth'
 
-interface UserContextProps {
-  user: CustomUser | null
-  setUser: Dispatch<SetStateAction<CustomUser | null>>
-  loading: boolean
-  setLoading: Dispatch<SetStateAction<boolean>>
+interface User {
+    uid: string
+    email: string | null
+}
+
+interface UserContextType {
+    user: User | null
+    setUser: React.Dispatch<React.SetStateAction<User | null>>
+    loading: boolean
 }
 
 interface UserProviderProps {
-  children: ReactNode
+    children: ReactNode;
 }
 
-export const UserContext = createContext<UserContextProps>({ 
-  user: null, 
-  setUser: () => {},
-  loading: true,
-  setLoading: () => {}
-})
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<CustomUser | null>(null)
-  const [loading, setLoading] = useState(true)
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
-      setLoading(false)
-    })
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser({
+                    uid: user.uid,
+                    email: user.email,
+                });
+            } else {
+                setUser(null)
+            }
+            setLoading(false)
+        });
 
-    // Cleanup subscription on unmount
-    return () => unsubscribe()
-  }, [])
+        return () => unsubscribe();
+    }, []);
 
-  return (
-    <UserContext.Provider value={{ user, setUser, loading, setLoading }}>
-      {children}
-    </UserContext.Provider>
-  )
-}
+    return (
+        <UserContext.Provider value={{ user, setUser, loading }}>
+            {children}
+        </UserContext.Provider>
+    );
+};
