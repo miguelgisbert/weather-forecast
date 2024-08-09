@@ -3,11 +3,12 @@
 import '../styles/globals.scss'
 import { useState, useEffect } from 'react'
 import { useMediaQuery, useTheme } from '@mui/material'
+import { UserProvider } from '@/UserContext'
 import Header from '../components/Header'
 import { ScreenSizeContext } from '../ScreenSizeContext'
 import { PopperProvider } from '../PopperContext'
 import { Breakpoint, CustomUser } from '../types'
-import { Grid, Card, Typography } from '@mui/material'
+import { Grid, Card, Typography, Box, CircularProgress } from '@mui/material'
 import { getCityCoordinates } from '../lib/getCityCoordinates'
 import Forecast from '@/pages/forecast'
 
@@ -61,10 +62,22 @@ export default function Home() {
     fetchCitiesCoordinates();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return (
+    <Box 
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  )
+  if (error) return <p>Error: {error}</p>
 
   return (
+    <UserProvider>
     <PopperProvider>
       <ScreenSizeContext.Provider value={currentBreakpoint}>
         <Header showPopper={false} />
@@ -78,5 +91,6 @@ export default function Home() {
         </Grid>
       </ScreenSizeContext.Provider>
     </PopperProvider>
+    </UserProvider>
   );
 }

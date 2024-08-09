@@ -19,14 +19,18 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ showPopper }) => {
-
-  const { user, setUser, /*loading,*/ setLoading } = useContext(UserContext)
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('UserContext must be used within a UserProvider');
+  }
+  const { user, setUser } = context
+  const [loading, setLoading] = useState<boolean>(true)
   const { formToShow, setFormToShow } = usePopper()
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [successMessage, setSuccessMessage] = useState<string>('')
-  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success')
   const [open, setOpen] = useState(false) // For Alerts
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
@@ -36,40 +40,35 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
-  
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const fetchUser = async () => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        setLoading(true);  
+
         if (user) {
-          const customUser: CustomUser = {
-            uid: user.uid,
-            email: user.email
-          }
-          console.log("CustomUser dins UserContext:", customUser)
-          setUser(customUser)
-          const docRef = doc(db, 'users', user.uid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const data = docSnap.data()
-          } else {
-            console.log('No user document!');
-          }
+            const customUser: CustomUser = {
+                uid: user.uid,
+                email: user.email
+            }
+            setUser(customUser)
+
+            const docRef = doc(db, 'users', user.uid)
+            const docSnap = await getDoc(docRef)
+            if (!docSnap.exists()) {
+                console.log('No user document!')
+            }
         } else {
-          setUser(null);
+            setUser(null)
         }
-        setLoading(false);
-        setEmail('');
-        setPassword('');
-        setErrorMessage('');
-      }
-      fetchUser();
+
+        setLoading(false)
+        setEmail('')
+        setPassword('')
+        setErrorMessage('')
     })
-    if (!auth.currentUser) {
-      setLoading(false)
-    }
+
     // Cleanup subscription on unmount
     return () => unsubscribe()
-  }, [])
+  }, [setLoading, setUser])
 
   useEffect(() => {
     setFormToShow(showPopper ? 'signup' : 'none')
@@ -79,8 +78,7 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
     setFormToShow('none')
     setAnchorEl(null)
     try {
-      await signInWithEmailAndPassword(auth, email, password)
-
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
     } catch (error) {
       if (error instanceof Error) {
         const firebaseError = error as FirebaseError
@@ -109,7 +107,6 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
       await setDoc(doc(db, "users", userCredential.user.uid), {
         email: email
       })
-
       setSuccessMessage('Account created')
       setAlertType('success')
       setOpen(true)
@@ -117,7 +114,6 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
     } catch (error) {
       if (error instanceof Error) {
         const firebaseError = error as FirebaseError
-        console.log(email, password)
         switch (firebaseError.code) {
           case 'auth/email-already-in-use':
             setErrorMessage('Email already in use.')
@@ -147,7 +143,7 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
       setUser(null)
       console.log("User signed out successfully.")
     } catch (error) {
-      console.log("Error signing out:", error);
+      console.log("Error signing out:", error)
     }
   }
 
@@ -164,35 +160,36 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
 
   return (
     <>
-    <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-      <Alert onClose={handleAlertClose} severity={alertType} sx={{ width: '100%' }}>
-        {alertType === 'success' ? successMessage : errorMessage}
-      </Alert>
-    </Snackbar>
-      {!user ? (
-        <Box sx={{ display: "flex", alignItems: "stretch" }}>
-          {user}
-          <Button ref={loginButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", height: "100%" }} 
-            onClick={(e) => {
-              setFormToShow('login')
-              setAnchorEl(e.currentTarget)
-            }}>
-              Login
-          </Button>
-          <Button ref={signUpButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", height: "100%", lineHeight: 1.3 }} 
-            onClick={(e) =>{
-              setFormToShow('signup')
-              setAnchorEl(e.currentTarget)  
-            }} >
-              Create <br /> Account
-          </Button>
-        </Box>
-      ) : (
-        <Box gap={2} sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-          <Typography>{user.email}</Typography>
-          <Button><LogoutIcon onClick={logout} sx={{ color: "white" }} /></Button>
-        </Box>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert onClose={handleAlertClose} severity={alertType} sx={{ width: '100%' }}>
+          {alertType === 'success' ? successMessage : errorMessage}
+        </Alert>
+      </Snackbar>
+      {!loading && (
+        !user ? (
+          <Box sx={{ display: "flex", alignItems: "stretch" }}>
+            <Button ref={loginButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", height: "100%" }} 
+              onClick={(e) => {
+                setFormToShow('login')
+                setAnchorEl(e.currentTarget)
+              }}>
+                Login
+            </Button>
+            <Button ref={signUpButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", height: "100%", lineHeight: 1.3 }} 
+              onClick={(e) =>{
+                setFormToShow('signup')
+                setAnchorEl(e.currentTarget)  
+              }} >
+                Create <br /> Account
+            </Button>
+          </Box>
+        ) : (
+          <Box gap={2} sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+            <Typography>{user.email}</Typography>
+            <Button><LogoutIcon onClick={logout} sx={{ color: "white" }} /></Button>
+          </Box>
+        )
       )}
       <ClickAwayListener onClickAway={(event) => {
         if (event.target !== loginButtonRef.current && event.target !== signUpButtonRef.current) {
@@ -211,7 +208,6 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
                 }} 
                 padding={5} 
                 onSubmit={e => {
-                  console.log("test")
                   e.preventDefault()
                   if (formToShow === 'login') {
                     console.log("signing in")
