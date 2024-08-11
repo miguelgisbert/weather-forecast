@@ -13,12 +13,14 @@ import { doc, setDoc, getFirestore, DocumentReference, getDoc } from 'firebase/f
 import { UserContext } from '../UserContext'
 import { usePopper } from '../PopperContext'
 import { CustomUser } from '../types'
+import translations from '../styles/translations'
 
 interface LoginProps {
   showPopper: boolean
+  language: string
 }
 
-const Login: React.FC<LoginProps> = ({ showPopper }) => {
+const Login: React.FC<LoginProps> = ({ showPopper, language }) => {
   const context = useContext(UserContext);
   if (!context) {
     throw new Error('UserContext must be used within a UserProvider');
@@ -92,6 +94,7 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
           default:
             setErrorMessage('Unknown error.')
         }
+        setAlertType('error')
         setOpen(true)
         console.log(firebaseError.code)
       }
@@ -169,19 +172,19 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
       {!loading && (
         !user ? (
           <Box sx={{ display: "flex", alignItems: "stretch" }}>
-            <Button ref={loginButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", height: "100%" }} 
+            <Button ref={loginButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", width: "120px", height: "100%" }} 
               onClick={(e) => {
                 setFormToShow('login')
                 setAnchorEl(e.currentTarget)
               }}>
-                Login
+                {translations[language].Login}
             </Button>
-            <Button ref={signUpButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", height: "100%", lineHeight: 1.3 }} 
+            <Button ref={signUpButtonRef} color="inherit" sx={{ display: "flex", alignItems: "center", height: "100%", width: "120px", lineHeight: 1.3 }} 
               onClick={(e) =>{
                 setFormToShow('signup')
                 setAnchorEl(e.currentTarget)  
               }} >
-                Create <br /> Account
+                {translations[language].CreateAccount}
             </Button>
           </Box>
         ) : (
@@ -219,20 +222,20 @@ const Login: React.FC<LoginProps> = ({ showPopper }) => {
             <TextField
               required
               id="email_login"
-              label="Email"
+              label={translations[language].Email}
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
             <TextField
               required
               id="password_login"
-              label="Password"
+              label={translations[language].Password}
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
             <Button type="submit" onSubmit={formToShow === 'login' ? signIn : signUp}>
-              {formToShow === 'login' ? 'Sign In' : 'Create Account'}
+              {formToShow === 'login' ? translations[language].Login : translations[language].CreateAccount}
             </Button>
           </Box>
         </Popper>
