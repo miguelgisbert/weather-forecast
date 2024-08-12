@@ -6,14 +6,15 @@ Authentication:
     ✔ Set firebase project @done(24-08-07 19:32)
     ✔ Set firebase login @done(24-08-07 19:32)
     ✔ Check firebase login @done(24-08-08 17:22)
-    ☐ Fix user creation when login and SignUp
-    ☐ Create authentication to view cites forecast
-
+    ✔ Fix user creation when login and SignUp @done(24-08-12 11:02)
+    ✔ Create authentication to view cites forecast @done(24-08-12 11:02)
+    
 Open Weather API: 
     ✔ Set connection @done(24-08-07 19:31)
     ✔ Create and style cards for cities @done(24-08-08 15:54)
-    ☐ Hide part of the card and create a "show more" button
-
+    ✔ Hide part of the card and create a "show more" button @done(24-08-12 11:02)
+        
 Language check:
-    ☐ Create swith for language
-    ☐ Include translations on theme
+    ✔ Create swith for language @done(24-08-12 11:02)
+    ✔ Include translations on theme @done(24-08-12 11:02)
+    ☐ Include login and SignUp error message on translations

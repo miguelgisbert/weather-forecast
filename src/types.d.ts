@@ -13,4 +13,4 @@ export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 type CustomUser = User & { isCompany?: boolean }
 
-type FormToShow = 'login' | 'signup' | 'none'
+type FormToShow = 'login' | 'signup' | 'contact' | 'none'
