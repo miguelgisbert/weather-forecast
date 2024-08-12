@@ -12,6 +12,7 @@ import { Grid, Card, Typography, Box, CircularProgress } from '@mui/material'
 import { getCityCoordinates } from '../lib/getCityCoordinates'
 import Forecast from '@/pages/forecast'
 import translations from '@/styles/translations'
+import { Contact } from '../components/Contact'
 
 interface City {
   name: string;
@@ -90,6 +91,7 @@ export default function Home() {
             </Card>
           ))}
         </Grid>
+        <Contact showPopper={false} language={language} />
       </ScreenSizeContext.Provider>
     </PopperProvider>
     </UserProvider>

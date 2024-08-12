@@ -86,13 +86,13 @@ const Login: React.FC<LoginProps> = ({ showPopper, language }) => {
         const firebaseError = error as FirebaseError
         switch (firebaseError.code) {
           case 'auth/invalid-credential':
-            setErrorMessage('Invalid user or password.')
+            setErrorMessage(translations[language].InvalidUserPass as string)
             break;
           case 'auth/invalid-email':
-            setErrorMessage('Invalid email.')
+            setErrorMessage(translations[language].InvalidEmail as string)
             break;
           default:
-            setErrorMessage('Unknown error.')
+            setErrorMessage(translations[language].UnknownError as string)
         }
         setAlertType('error')
         setOpen(true)
@@ -119,19 +119,19 @@ const Login: React.FC<LoginProps> = ({ showPopper, language }) => {
         const firebaseError = error as FirebaseError
         switch (firebaseError.code) {
           case 'auth/email-already-in-use':
-            setErrorMessage('Email already in use.')
+            setErrorMessage(translations[language].EmailInUse as string)
             break;
           case 'auth/weak-password':
-            setErrorMessage('Weak password (6 characters).')
+            setErrorMessage(translations[language].WeakPassword as string)
             break;
           case 'auth/invalid-email':
-            setErrorMessage('Invalid email.')
+            setErrorMessage(translations[language].InvalidEmail as string)
             break;
           case 'auth/invalid-credential':
-            setErrorMessage('Wrong password.')
+            setErrorMessage(translations[language].WrongPassword as string)
             break;
           default:
-            setErrorMessage('Unknown error.')
+            setErrorMessage(translations[language].UnknownError as string)
         }
         setAlertType('error')
         setOpen(true)
