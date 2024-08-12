@@ -74,7 +74,7 @@ const Login: React.FC<LoginProps> = ({ showPopper, language }) => {
 
   useEffect(() => {
     setFormToShow(showPopper ? 'signup' : 'none')
-  }, [showPopper])
+  }, [showPopper, setFormToShow])
 
   const signIn = async () => {
     setFormToShow('none')

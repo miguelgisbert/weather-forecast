@@ -50,9 +50,9 @@ const Forecast: React.FC<ForecastProps> = ({ lat, lon, language }) => {
       }
     }
     fetchData();
-  }, [language])
+  }, [language, lat, lon])
 
-  if (!user) return <p>{translations[language].LoginMessage}</p>
+  if (!user) return <p>{translations[language]?.LoginMessage ?? "Please log in to view the forecast."}</p>
   if (loading) return (
     <Box 
       sx={{

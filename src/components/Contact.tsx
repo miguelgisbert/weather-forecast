@@ -31,7 +31,7 @@ const Contact: React.FC<LoginProps> = ({ showPopper, language }) => {
 
   useEffect(() => {
     setFormToShow(showPopper ? 'contact' : 'none')
-  }, [showPopper])
+  }, [showPopper, setFormToShow])
 
   const handleClose = (_: React.SyntheticEvent | Event, reason: SnackbarCloseReason) => {
     if (reason === 'clickaway') {
